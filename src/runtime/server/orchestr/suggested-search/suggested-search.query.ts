@@ -7,6 +7,8 @@ import { defineBatteryIncludedQuery } from '../../middleware/defineIncludedBatte
 export default defineBatteryIncludedQuery({
   implements: SuggestedSearchSearchQuery,
   order: 2,
+  // The entries link and resolver `require` the passthrough, so a cache hit must restore it.
+  cache: { ttl: '5m', includePassthrough: true },
   run: async ({ context, input, passthrough }) => {
     const { batteryIncludedClient } = context;
 

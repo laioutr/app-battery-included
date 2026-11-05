@@ -12,7 +12,8 @@ export const defineBatteryIncluded = defineOrchestr
       { key: 'price:desc', label: 'Price (desc)' },
     ];
 
-    const batteryIncludedClient = batteryIncludedClientFactory({ locale: clientEnv.locale.split('-')[0] });
+    // BI indexes by ISO 639 language ("de"), the request carries a BCP 47 tag ("de-CH").
+    const batteryIncludedClient = batteryIncludedClientFactory({ locale: clientEnv.language.code.split('-')[0]! });
 
     return { context: { availableSortings, batteryIncludedClient } };
   });

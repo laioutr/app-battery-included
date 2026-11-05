@@ -1,2 +1,2 @@
 // Export your public api here
-export {};
+export { BatteryIncludedApiError, isBatteryIncludedApiError } from './server/client/sdk/errors';

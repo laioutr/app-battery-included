@@ -1,5 +1,5 @@
-import { Facet } from '../../types/facets';
-import { Hit } from '../../types/hit';
+import type { Facet } from '../../types/facets';
+import type { Hit } from '../../types/hit';
 
 export type SearchParams = Record<string, string | number | null | undefined | string[]>;
 

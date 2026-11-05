@@ -1,4 +1,42 @@
-import { BrowseResponse, HighlightsResponse, RecommendationsResponse, SearchParams, SuggestResponse, WithDefaultParams } from './types';
+import { BatteryIncludedApiError } from './errors';
+import type {
+  BrowseResponse,
+  HighlightsResponse,
+  RecommendationsResponse,
+  SearchParams,
+  SuggestResponse,
+  WithDefaultParams,
+} from './types';
+
+/** How much of an error body is kept on the thrown error. */
+const ERROR_BODY_LIMIT = 500;
+
+/**
+ * Builds the query string for a Battery Included request. Arrays are sent as repeated keys, so a
+ * key that BI reads as a list must carry its own `[]` suffix (e.g. `f[brand][]`). `null` and
+ * `undefined` values are left out.
+ */
+export const buildSearchParams = (locale: string, searchParams: SearchParams = {}) => {
+  const requestSearchParams = new URLSearchParams();
+
+  requestSearchParams.set('v[locale]', locale);
+
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (Array.isArray(value)) {
+      for (const val of value) requestSearchParams.append(key, val);
+    } else if (value !== undefined && value !== null) {
+      requestSearchParams.set(key, value.toString());
+    }
+  }
+
+  return requestSearchParams;
+};
+
+/**
+ * Identical GET requests that are in flight at the same time share one fetch, so two handlers of
+ * one page that ask the same question (e.g. a listing and its teasers) cost one BI call.
+ */
+const inFlight = new Map<string, Promise<unknown>>();
 
 class BatteryIncludedSDK {
   private baseURL: string;
@@ -19,28 +57,32 @@ class BatteryIncludedSDK {
     searchParams: SearchParams = {},
     payload: unknown = {}
   ): Promise<T> {
-    const requestSearchParams = new URLSearchParams();
+    const url = `${this.baseURL}/api/v1/collections/${this.collection}${endpoint}?${buildSearchParams(this.locale, searchParams).toString()}`;
 
-    requestSearchParams.set('v[locale]', this.locale);
+    const request = async () => {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'X-BI-API-KEY': this.apiKey },
+        ...(method === 'GET' ? {} : { body: JSON.stringify(payload) }),
+      });
 
-    for (const searchParam in searchParams) {
-      if (Array.isArray(searchParams[searchParam])) {
-        for (const val of searchParams[searchParam]) {
-          requestSearchParams.append(searchParam, val);
-        }
-      } else if (searchParams[searchParam] !== undefined && searchParams[searchParam] !== null) {
-        requestSearchParams.set(searchParam, searchParams[searchParam].toString());
+      if (!response.ok) {
+        const body = await response.text().catch(() => '');
+        throw new BatteryIncludedApiError(response.status, endpoint, body.slice(0, ERROR_BODY_LIMIT));
       }
-    }
-    const response = await fetch(`${this.baseURL}/api/v1/collections/${this.collection}${endpoint}?${requestSearchParams.toString()}`, {
-      method,
-      headers: { 'Content-Type': 'application/json', 'X-BI-API-KEY': this.apiKey },
-      ...(method === 'GET' ? {} : { body: JSON.stringify(payload) }),
-    });
 
-    const data = (await response.json()) as T;
+      return (await response.json()) as T;
+    };
 
-    return data;
+    if (method !== 'GET') return request();
+
+    const key = `${this.apiKey}\n${url}`;
+    const pending = inFlight.get(key);
+    if (pending) return pending as Promise<T>;
+
+    const promise = request().finally(() => inFlight.delete(key));
+    inFlight.set(key, promise);
+    return promise;
   }
 
   /* Shortcut methods */
