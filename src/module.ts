@@ -18,6 +18,11 @@ export interface ModuleOptions {
    * descending, top sellers (`_history.salesCount`) and newest (`_common.releaseDate`).
    */
   sortings?: BatteryIncludedSorting[];
+  /**
+   * BI field names whose filter values are shown as swatches, e.g. `_product_i18n.properties.Farbe`.
+   * A facet whose values carry a colour or image from BI is a swatch facet without being listed.
+   */
+  swatchFacets?: string[];
 }
 
 /**

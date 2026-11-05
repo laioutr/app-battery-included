@@ -9,7 +9,7 @@ export default defineBatteryIncludedQuery({
   run: async ({ context, input, pagination, filter, sorting }) => {
     const { query } = input;
 
-    const { batteryIncludedClient, sortings } = context;
+    const { batteryIncludedClient, sortings, facetOptions } = context;
 
     const filters = filter ? mapSelectedFiltersToBatteryIncludedFilters(filter) : {};
     const { sorting: appliedSorting, sort } = resolveSorting(sorting, sortings);
@@ -22,7 +22,7 @@ export default defineBatteryIncludedQuery({
       sort,
     });
 
-    const availableFilters = mapBatteryIncludedFacetsToAvailableFilters(data.facet_counts);
+    const availableFilters = mapBatteryIncludedFacetsToAvailableFilters(data.facet_counts, facetOptions);
 
     return {
       ids: data.hits.map((hit) => hit.document.id),

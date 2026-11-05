@@ -8,12 +8,14 @@ export const defineBatteryIncluded = defineOrchestr
     app: name,
   })
   .extendRequest(({ clientEnv }) => {
-    const sortings = useRuntimeConfig()['@laioutr/app-battery-included'].sortings ?? DEFAULT_SORTINGS;
+    const config = useRuntimeConfig()['@laioutr/app-battery-included'];
+    const sortings = config.sortings ?? DEFAULT_SORTINGS;
+    const facetOptions = { swatchFacets: config.swatchFacets ?? [] };
 
     // BI indexes by ISO 639 language ("de"), the request carries a BCP 47 tag ("de-CH").
     const batteryIncludedClient = batteryIncludedClientFactory({ locale: clientEnv.language.code.split('-')[0]! });
 
-    return { context: { sortings, batteryIncludedClient } };
+    return { context: { sortings, facetOptions, batteryIncludedClient } };
   });
 
 export const defineBatteryIncludedAction = defineBatteryIncluded.actionHandler;
