@@ -2,6 +2,7 @@
 import { createResolver, defineNuxtModule, installModule } from '@nuxt/kit';
 import { defu } from 'defu';
 import { registerLaioutrApp } from '@laioutr-core/kit';
+import type { BatteryIncludedSorting } from './runtime/server/orchestr-helper/sorting';
 import type { NuxtModule } from '@nuxt/schema';
 import { name, version } from '../package.json';
 
@@ -12,6 +13,11 @@ export interface ModuleOptions {
   baseURL?: string;
   collection: string;
   apiKey: string;
+  /**
+   * The sortings listings offer, in this order. Replaces the defaults: relevance, price ascending and
+   * descending, top sellers (`_history.salesCount`) and newest (`_common.releaseDate`).
+   */
+  sortings?: BatteryIncludedSorting[];
 }
 
 /**

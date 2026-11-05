@@ -1,21 +1,19 @@
-import { defineOrchestr } from '#imports';
+import { defineOrchestr, useRuntimeConfig } from '#imports';
 import { name } from '../../../../package.json';
 import batteryIncludedClientFactory from '../client';
+import { DEFAULT_SORTINGS } from '../orchestr-helper/sorting';
 
 export const defineBatteryIncluded = defineOrchestr
   .meta({
     app: name,
   })
   .extendRequest(({ clientEnv }) => {
-    const availableSortings = [
-      { key: 'price:asc', label: 'Price (asc)' },
-      { key: 'price:desc', label: 'Price (desc)' },
-    ];
+    const sortings = useRuntimeConfig()['@laioutr/app-battery-included'].sortings ?? DEFAULT_SORTINGS;
 
     // BI indexes by ISO 639 language ("de"), the request carries a BCP 47 tag ("de-CH").
     const batteryIncludedClient = batteryIncludedClientFactory({ locale: clientEnv.language.code.split('-')[0]! });
 
-    return { context: { availableSortings, batteryIncludedClient } };
+    return { context: { sortings, batteryIncludedClient } };
   });
 
 export const defineBatteryIncludedAction = defineBatteryIncluded.actionHandler;
