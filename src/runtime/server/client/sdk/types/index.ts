@@ -16,7 +16,35 @@ export interface BrowseResponse {
   hits: Array<Hit>;
   out_of: number;
   page: number;
+  /** Merchandising BI attaches to the answer: grid teasers, search redirects, and kinds this app does not know. */
+  extensions?: Array<BrowseExtension>;
 }
+
+/** A merchandising teaser shown inside the product grid. */
+export interface TeaserExtension {
+  id: string;
+  type: 'teaser';
+  data: {
+    name: string;
+    code?: string;
+    /** Size in grid cells as `<rows>x<columns>`, e.g. `1x2`. */
+    format?: string;
+    image?: { alt?: string; desktop?: string; mobile?: string };
+    itemType?: string;
+    /** 1-based index of the hit on the current page the teaser is shown before. */
+    position: number;
+    url?: string;
+  };
+}
+
+/** A search term BI sends to a fixed URL instead of a result list. */
+export interface RedirectExtension {
+  id: string;
+  type: 'redirects';
+  data: { url: string; name?: string };
+}
+
+export type BrowseExtension = TeaserExtension | RedirectExtension | { id: string; type: string; data: Record<string, unknown> };
 
 export type QueryCompletionSuggestItem = {
   kind: 'query-completion';

@@ -84,6 +84,19 @@ The filter id is BI's `field_name`. Lists are sent as `f[<field>][]`, ranges as 
 
 `SuggestedSearchProductsLink` returns the suggested products as `Product` ids, so the commerce app resolves image, price and URL for a product row. Without a query, the query answers BI's highlights (top searches). A reference needs a slug: it is the canonical SEO path where the index carries one (`_product.mappedFields.seoUrls`), otherwise `<name>-<id>`, app-shopware's fallback slug format. Content pages and promotions are kept because `page` and `url` links can represent them; a storefront that does not want them filters by `type`.
 
+## Merchandising teasers and search redirects
+
+BI attaches `extensions` to a browse answer. Canonical types have no slot for them on a product query, so the app answers them through its own query tokens (exported from `@laioutr/app-battery-included/runtime`):
+
+| Token                                                                     | Input                                | Answers                                                                                                                        |
+| ------------------------------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `battery-included/listing/teasers` (`BatteryIncludedListingTeasersQuery`) | `{ categoryId?, streamId?, query? }` | `BatteryIncludedTeaser` entities, `base`: `name`, `position`, `format`, `rows`, `columns`, `link`, `image`, `code`, `itemType` |
+| `battery-included/search/redirect` (`BatteryIncludedSearchRedirectQuery`) | `{ query }`                          | one `BatteryIncludedRedirect` entity, `base`: `url`; "not found" for a term without a redirect                                 |
+
+- **Teasers**: bind the teaser query next to the listing's product query with the same input, filter, sorting and pagination, since BI places teasers per page. `position` is the 1-based index of the product on the current page the teaser is shown before; `format` is BI's `<rows>x<columns>`, also given as `rows` and `columns`; `image` has the desktop and mobile sources BI sends. Loaded together with the product query, both share one BI call (identical requests in flight share one fetch).
+- **Redirects**: on the search page, load the redirect query with the search term and navigate to `url` when it answers. It runs the search's first-page browse (48 per page), so it shares BI's answer with a default search.
+- **Other kinds**: the product queries put BI's raw `extensions` into the passthrough token `browseExtensionsToken` for project handlers in the same request. It is only set when the query ran, not when it was served from the cache.
+
 ## Errors
 
 A non-2xx answer from BI throws `BatteryIncludedApiError` with `status`, `endpoint` and a short `body`; `isBatteryIncludedApiError` is exported from `@laioutr/app-battery-included/runtime`. Recommendations degrade instead: a product whose BI call fails gets none.
