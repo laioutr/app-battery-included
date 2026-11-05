@@ -40,7 +40,7 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     nuxt.options.build.transpile.push(resolve('./runtime'));
 
     // Runtime configuration for this module
-    nuxt.options.runtimeConfig[name] = defu(nuxt.options.runtimeConfig[name], options);
+    nuxt.options.runtimeConfig[name] = defu(nuxt.options.runtimeConfig[name] as Partial<ModuleOptions> | undefined, options);
 
     await registerLaioutrApp({
       name,
@@ -49,8 +49,9 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     });
 
     // Install peer-dependency modules only on prepare-step. Needs to be added in the playground as well.
+    // No commerce app is installed here: the host project brings the one that resolves the product ids.
     if (nuxt.options._prepare) {
-      const modulesToInstall = ['@laioutr-core/frontend-core', '@nuxt/image', '@laioutr-app/shopify'];
+      const modulesToInstall = ['@laioutr-core/frontend-core', '@nuxt/image'];
 
       for (const module of modulesToInstall) await installModule(module);
     }
