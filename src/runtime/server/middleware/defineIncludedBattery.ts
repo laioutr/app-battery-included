@@ -11,11 +11,15 @@ export const defineBatteryIncluded = defineOrchestr
     const config = useRuntimeConfig()['@laioutr/app-battery-included'];
     const sortings = config.sortings ?? DEFAULT_SORTINGS;
     const facetOptions = { swatchFacets: config.swatchFacets ?? [] };
+    const fields = {
+      categoryId: config.fields?.categoryId ?? '_product_i18n.categoryTree.id',
+      streamId: config.fields?.streamId ?? '_product.streamIds',
+    };
 
     // BI indexes by ISO 639 language ("de"), the request carries a BCP 47 tag ("de-CH").
     const batteryIncludedClient = batteryIncludedClientFactory({ locale: clientEnv.language.code.split('-')[0]! });
 
-    return { context: { sortings, facetOptions, batteryIncludedClient } };
+    return { context: { sortings, facetOptions, fields, batteryIncludedClient } };
   });
 
 export const defineBatteryIncludedAction = defineBatteryIncluded.actionHandler;

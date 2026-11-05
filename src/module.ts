@@ -23,6 +23,13 @@ export interface ModuleOptions {
    * A facet whose values carry a colour or image from BI is a swatch facet without being listed.
    */
   swatchFacets?: string[];
+  /** BI fields the listings filter by. Defaults fit BI's Shopware export. */
+  fields?: {
+    /** @default '_product_i18n.categoryTree.id' */
+    categoryId?: string;
+    /** @default '_product.streamIds' */
+    streamId?: string;
+  };
 }
 
 /**

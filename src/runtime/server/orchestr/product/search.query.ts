@@ -1,35 +1,15 @@
 import { ProductSearchQuery } from '@laioutr-core/canonical-types/ecommerce';
 import { defineBatteryIncludedQuery } from '../../middleware/defineIncludedBattery';
-import { mapBatteryIncludedFacetsToAvailableFilters, mapSelectedFiltersToBatteryIncludedFilters } from '../../orchestr-helper/facets';
-import { resolveSorting, toAvailableSortings } from '../../orchestr-helper/sorting';
+import { browseProducts } from '../../orchestr-helper/browse';
 
 export default defineBatteryIncludedQuery({
   implements: ProductSearchQuery,
+  // app-shopware implements the same token without an order; above it, BI wins regardless of install order.
+  order: 2,
   cache: { ttl: '5m' },
   run: async ({ context, input, pagination, filter, sorting }) => {
-    const { query } = input;
+    const { result } = await browseProducts({ context, query: input.query, pagination, filter, sorting });
 
-    const { batteryIncludedClient, sortings, facetOptions } = context;
-
-    const filters = filter ? mapSelectedFiltersToBatteryIncludedFilters(filter) : {};
-    const { sorting: appliedSorting, sort } = resolveSorting(sorting, sortings);
-
-    const data = await batteryIncludedClient.browse({
-      query,
-      page: pagination.page,
-      per_page: pagination.limit,
-      filters,
-      sort,
-    });
-
-    const availableFilters = mapBatteryIncludedFacetsToAvailableFilters(data.facet_counts, facetOptions);
-
-    return {
-      ids: data.hits.map((hit) => hit.document.id),
-      total: data.found,
-      availableFilters,
-      availableSortings: toAvailableSortings(sortings),
-      sorting: appliedSorting,
-    };
+    return result;
   },
 });

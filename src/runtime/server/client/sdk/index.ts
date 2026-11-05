@@ -100,7 +100,7 @@ class BatteryIncludedSDK {
 
   /* Endpoints implementation 🚀 */
 
-  async browse({ query, page, per_page, sort, filters = {} }: WithDefaultParams<{ query: string }>) {
+  async browse({ query, page, per_page, sort, filters = {} }: WithDefaultParams<{ query?: string }>) {
     return this.get<BrowseResponse>(`/documents/browse`, { q: query, page, per_page, sort, ...filters });
   }
 
