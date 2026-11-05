@@ -1,17 +1,12 @@
 import { createPassthroughToken } from '#imports';
-import { PageTypeToken } from '@laioutr-core/core-types/frontend';
-import { RecommendationsResponse } from '../client/sdk/types';
+import type { RecommendationsResponse } from '../client/sdk/types';
+import type { SuggestionEntry } from '../orchestr-helper/suggest';
 
 export const suggestionResultsFragmentToken = createPassthroughToken<{
   id: string;
-  suggestions: Array<{
-    id: string;
-    type: string;
-    title: string;
-    link:
-      | { type: 'reference'; reference: { type: string; id: string; slug: string } }
-      | { type: 'pageType'; pageType: PageTypeToken; params: Record<string, string> };
-  }>;
+  suggestions: SuggestionEntry[];
+  /** Ids of the suggested products, for `SuggestedSearchProductsLink`. */
+  productIds?: string[];
 }>('@laioutr/app-battery-included/suggestionResults');
 
 export const recommendationsToken = createPassthroughToken<RecommendationsResponse>('@laioutr/app-battery-included/recommendations');

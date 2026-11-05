@@ -10,7 +10,7 @@ export default defineBatteryIncludedComponentResolver({
   resolve: ({ passthrough, $entity }) => {
     const results = passthrough.require(suggestionResultsFragmentToken);
 
-    const entities = results.suggestions.map(({ id, type, title, link }) =>
+    const entities = results.suggestions.map(({ id, type, title, link, cover }) =>
       $entity({
         id,
 
@@ -18,6 +18,7 @@ export default defineBatteryIncludedComponentResolver({
           type,
           title,
           link,
+          ...(cover ? { cover } : {}),
         }),
       })
     );

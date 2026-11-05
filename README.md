@@ -69,6 +69,21 @@ Configure others with `sortings: [{ key, label, field?, order? }]`; a sorting wi
 
 The filter id is BI's `field_name`. Lists are sent as `f[<field>][]`, ranges as `f[<field>][from]` / `f[<field>][till]` (an open end is left out). Price, manufacturer and category facets carry the well-known names `price`, `brand` and `category`. A facet is presented as swatches when it is listed in `swatchFacets` or BI attaches a colour or image to its values; values without one show their label, so the storefront can map names to colours. Orchestr filters have no tree: a category hierarchy is flattened in the order BI returns it, labelled by the category name BI attaches.
 
+## Suggest
+
+`SuggestedSearchSearchQuery` maps BI's suggest kinds to `SuggestedSearchEntry` entities (`base`: `type`, `title`, `link`, `cover`):
+
+| BI kind                                                               | Entry `type`       | Link                                                      |
+| --------------------------------------------------------------------- | ------------------ | --------------------------------------------------------- |
+| `query-completion`                                                    | `query-suggestion` | search page with the term                                 |
+| `document` with `_product`                                            | `product`          | reference to the `Product` (cover from the index's image) |
+| `document` with `_content_i18n` (content pages)                       | `page`             | the page's URL                                            |
+| `facet._product_i18n.categoryTree.name`                               | `category`         | reference to the `Category` by the id BI attaches         |
+| `facet._product_i18n.categories`, `facet._product.categories` (no id) | `category`         | search page with the name                                 |
+| `promotions`                                                          | `promotion`        | the promotion's URL, cover from its desktop/mobile images |
+
+`SuggestedSearchProductsLink` returns the suggested products as `Product` ids, so the commerce app resolves image, price and URL for a product row. Without a query, the query answers BI's highlights (top searches). A reference needs a slug: it is the canonical SEO path where the index carries one (`_product.mappedFields.seoUrls`), otherwise `<name>-<id>`, app-shopware's fallback slug format. Content pages and promotions are kept because `page` and `url` links can represent them; a storefront that does not want them filters by `type`.
+
 ## Errors
 
 A non-2xx answer from BI throws `BatteryIncludedApiError` with `status`, `endpoint` and a short `body`; `isBatteryIncludedApiError` is exported from `@laioutr/app-battery-included/runtime`. Recommendations degrade instead: a product whose BI call fails gets none.
