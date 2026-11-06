@@ -14,6 +14,11 @@ export interface ModuleOptions {
   collection: string;
   apiKey: string;
   /**
+   * The locale BI indexed the collection under, e.g. `de-DE`. Left out, it is the storefront language with the
+   * market's region (`de` in a market for DE becomes `de-DE`).
+   */
+  locale?: string;
+  /**
    * The sortings listings offer, in this order. Replaces the defaults: relevance, price ascending and
    * descending, top sellers (`_history.salesCount`) and newest (`_common.releaseDate`).
    */
