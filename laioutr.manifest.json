@@ -1,1 +1,76 @@
-{}
+{
+  "configSettings": {
+    "placement": "environment",
+    "menu": {
+      "label": "Battery Included",
+      "icon": "LuSearch"
+    },
+    "sections": [
+      {
+        "label": "Collection",
+        "description": "The Battery Included collection this environment's search, suggestions, recommendations and listings read from. Battery Included provides its name and API key.",
+        "fields": [
+          {
+            "name": "collection",
+            "type": "text",
+            "label": "Collection",
+            "description": "The collection's name as Battery Included set it up. Every request names it.",
+            "required": true
+          },
+          {
+            "name": "apiKey",
+            "type": "secret",
+            "label": "API key",
+            "description": "Sent with every request. Without it Battery Included refuses search, listings and recommendations."
+          }
+        ],
+        "test": {
+          "hosts": ["api.batteryincluded.io"],
+          "method": "GET",
+          "url": "https://api.batteryincluded.io/api/v1/collections/{{collection}}/documents/browse?per_page=1",
+          "headers": {
+            "X-BI-API-KEY": "{{apiKey}}"
+          },
+          "expect": "found"
+        }
+      },
+      {
+        "label": "Listings",
+        "description": "How listings sort and which Battery Included fields they filter by. The defaults fit Battery Included's Shopware export; change them only for another index.",
+        "fields": [
+          {
+            "name": "sortings",
+            "type": "json",
+            "label": "Sortings",
+            "description": "The sort options listings offer, in this order, as a JSON list. Each entry has a key (what the storefront sends), a label, and, for anything but relevance, a Battery Included field and an order, asc or desc. Replaces the defaults: relevance, price low to high and high to low, top sellers and newest."
+          },
+          {
+            "name": "swatchFacets",
+            "type": "json",
+            "label": "Swatch filters",
+            "description": "Fields whose filter values are shown as swatches, as a JSON list of field names, e.g. [\"_product_i18n.properties.Farbe\"]. A filter whose values already carry a colour or image from Battery Included is shown as swatches without being listed."
+          },
+          {
+            "name": "fields",
+            "type": "json",
+            "label": "Filter fields",
+            "description": "The fields category and product-stream listings filter by, as a JSON object with categoryId (default _product_i18n.categoryTree.id) and streamId (default _product.streamIds)."
+          }
+        ]
+      },
+      {
+        "label": "Address",
+        "description": "Only needed when Battery Included gives you an address other than its default.",
+        "fields": [
+          {
+            "name": "baseURL",
+            "type": "text",
+            "label": "API address",
+            "description": "Leave empty to use https://api.batteryincluded.io. The connection test always checks that default address.",
+            "placeholder": "https://api.batteryincluded.io"
+          }
+        ]
+      }
+    ]
+  }
+}
