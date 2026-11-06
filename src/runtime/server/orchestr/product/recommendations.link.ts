@@ -1,6 +1,7 @@
 import type { RecommendationsResponse } from '../../client/sdk/types';
 import { recommendationsToken } from '../../const/passthroughTokens';
 import { RecommendationBase } from '../../lib/entity/recommendation';
+import { productIdOf } from '../../lib/productId';
 import { BatteryIncludedProductRecommendations } from '../../lib/tokens/recommendations.link';
 import { defineBatteryIncludedLink } from '../../middleware/defineIncludedBattery';
 
@@ -25,10 +26,26 @@ export default defineBatteryIncludedLink({
 
     const sourceIds = [...new Set(entityIds)];
 
+    // The source ids are the commerce app's; BI recommends by its own id.
+    let documentIds: Map<string, string>;
+    try {
+      documentIds = await batteryIncludedClient.documentIdsOf(sourceIds);
+    } catch (error) {
+      console.warn('[app-battery-included] looking up BI ids for recommendations failed', error);
+      for (const id of sourceIds) failedSourceIds.add(id);
+      return { links: sourceIds.map((id) => ({ sourceId: id, entities: [] })) };
+    }
+
     const responses = await Promise.all(
       sourceIds.map(async (id): Promise<readonly [string, RecommendationsResponse]> => {
+        const documentId = documentIds.get(id);
+        // A product BI does not index has no recommendations; that answer is final, not a failure.
+        if (!documentId) {
+          failedSourceIds.delete(id);
+          return [id, []];
+        }
         try {
-          const res = await batteryIncludedClient.recommend({ id });
+          const res = await batteryIncludedClient.recommend({ id: documentId });
           failedSourceIds.delete(id);
           return [id, res];
         } catch (error) {
@@ -51,7 +68,7 @@ export default defineBatteryIncludedLink({
     return {
       links: sourceIds.map((id) => ({
         sourceId: id,
-        entities: (byId.get(id) ?? []).map((res) => $entity({ id: res.document.id, base: () => ({ relation: res.type }) })),
+        entities: (byId.get(id) ?? []).map((res) => $entity({ id: productIdOf(res.document), base: () => ({ relation: res.type }) })),
       })),
     };
   },

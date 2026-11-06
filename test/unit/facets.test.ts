@@ -24,9 +24,16 @@ describe('mapSelectedFiltersToBatteryIncludedFilters', () => {
     expect(mapSelectedFiltersToBatteryIncludedFilters({ brand: [] })).toEqual({});
   });
 
-  it('omits open range ends instead of sending sentinels', () => {
-    expect(mapSelectedFiltersToBatteryIncludedFilters({ '_product.price': { min: 100 } })).toEqual({ 'f[_product.price][from]': 100 });
-    expect(mapSelectedFiltersToBatteryIncludedFilters({ '_product.price': { max: 500 } })).toEqual({ 'f[_product.price][till]': 500 });
+  it('sends an open range end as the widest safe integer, since BI needs both ends', () => {
+    expect(mapSelectedFiltersToBatteryIncludedFilters({ '_product.price': { min: 100 } })).toEqual({
+      'f[_product.price][from]': 100,
+      'f[_product.price][till]': Number.MAX_SAFE_INTEGER,
+    });
+    expect(mapSelectedFiltersToBatteryIncludedFilters({ '_product.price': { max: 500 } })).toEqual({
+      'f[_product.price][from]': Number.MIN_SAFE_INTEGER,
+      'f[_product.price][till]': 500,
+    });
+    expect(mapSelectedFiltersToBatteryIncludedFilters({ '_product.price': {} })).toEqual({});
     expect(mapSelectedFiltersToBatteryIncludedFilters({ '_product.price': { min: 0, max: 500 } })).toEqual({
       'f[_product.price][from]': 0,
       'f[_product.price][till]': 500,

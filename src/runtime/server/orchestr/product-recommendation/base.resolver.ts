@@ -1,5 +1,6 @@
 import { recommendationsToken } from '../../const/passthroughTokens';
 import { RecommendationBase } from '../../lib/entity/recommendation';
+import { productIdOf } from '../../lib/productId';
 import { defineBatteryIncludedComponentResolver } from '../../middleware/defineIncludedBattery';
 
 export default defineBatteryIncludedComponentResolver({
@@ -11,7 +12,7 @@ export default defineBatteryIncludedComponentResolver({
     // this runs only for an entity requested on its own, e.g. after a cache restore without the
     // passthrough: answer what is known and leave the rest out instead of failing the request.
     const recommendations = passthrough.get(recommendationsToken) ?? [];
-    const relationById = new Map(recommendations.map((res) => [res.document.id, res.type]));
+    const relationById = new Map(recommendations.map((res) => [productIdOf(res.document), res.type]));
 
     const entities = entityIds.flatMap((id) => {
       const relation = relationById.get(id);

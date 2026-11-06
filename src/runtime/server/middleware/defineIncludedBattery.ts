@@ -16,8 +16,8 @@ export const defineBatteryIncluded = defineOrchestr
       streamId: config.fields?.streamId ?? '_product.streamIds',
     };
 
-    // BI indexes by ISO 639 language ("de"), the request carries a BCP 47 tag ("de-CH").
-    const batteryIncludedClient = batteryIncludedClientFactory({ locale: clientEnv.language.code.split('-')[0]! });
+    // BI matches documents by the full tag the shop exported ("de-DE"); "de" alone finds nothing.
+    const batteryIncludedClient = batteryIncludedClientFactory({ locale: clientEnv.language.code });
 
     return { context: { sortings, facetOptions, fields, batteryIncludedClient } };
   });

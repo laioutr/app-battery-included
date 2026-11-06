@@ -1,5 +1,6 @@
 import type { BrowseExtension, RedirectExtension, TeaserExtension } from '../../client/sdk/types';
 import type { MediaImage } from '@laioutr-core/core-types/common';
+import { linkTargetOf } from '../../lib/linkTarget';
 
 export interface Teaser {
   id: string;
@@ -15,10 +16,10 @@ export interface Teaser {
 }
 
 const isTeaser = (extension: BrowseExtension): extension is TeaserExtension =>
-  extension.type === 'teaser' && typeof (extension.data as { position?: unknown }).position === 'number';
+  extension.type === 'teaser' && typeof (extension.data as { position?: unknown } | null)?.position === 'number';
 
 const isRedirect = (extension: BrowseExtension): extension is RedirectExtension =>
-  extension.type === 'redirects' && typeof (extension.data as { url?: unknown }).url === 'string';
+  extension.type === 'redirects' && typeof (extension.data as { url?: unknown } | null)?.url === 'string';
 
 /** `<rows>x<columns>` to cell spans; a missing or malformed part spans one cell. */
 const spanOf = (format: string | undefined) => {
@@ -33,6 +34,7 @@ export const mapTeasers = (extensions: BrowseExtension[] = []): Teaser[] =>
     .filter(isTeaser)
     .map(({ id, data }) => {
       const alt = data.image?.alt ?? data.name;
+      const href = linkTargetOf(data.url);
       const sources = [
         ...(data.image?.desktop ? [{ provider: 'raw', src: data.image.desktop, responsive: 'desktop' as const }] : []),
         ...(data.image?.mobile ? [{ provider: 'raw', src: data.image.mobile, responsive: 'mobile' as const }] : []),
@@ -44,7 +46,7 @@ export const mapTeasers = (extensions: BrowseExtension[] = []): Teaser[] =>
         position: data.position,
         ...spanOf(data.format),
         ...(data.format ? { format: data.format } : {}),
-        ...(data.url ? { link: { type: 'url' as const, href: data.url } } : {}),
+        ...(href ? { link: { type: 'url' as const, href } } : {}),
         ...(sources.length > 0 ? { image: { type: 'image' as const, alt, sources } } : {}),
         ...(data.code ? { code: data.code } : {}),
         ...(data.itemType ? { itemType: data.itemType } : {}),
@@ -54,6 +56,9 @@ export const mapTeasers = (extensions: BrowseExtension[] = []): Teaser[] =>
 
 /** The first redirect BI attaches, or `undefined`. */
 export const findRedirect = (extensions: BrowseExtension[] = []): { url: string } | undefined => {
-  const redirect = extensions.find(isRedirect);
-  return redirect ? { url: redirect.data.url } : undefined;
+  for (const redirect of extensions.filter(isRedirect)) {
+    const url = linkTargetOf(redirect.data.url);
+    if (url) return { url };
+  }
+  return undefined;
 };

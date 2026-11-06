@@ -1,6 +1,7 @@
 import { ProductSearchPage } from '@laioutr-core/canonical-types/ecommerce';
 import type { ContentSuggestHit, HighlightsResponse, ProductSuggestHit, SuggestItem, SuggestResponse } from '../../client/sdk/types';
 import type { Link, MediaImage } from '@laioutr-core/core-types/common';
+import { linkTargetOf } from '../../lib/linkTarget';
 import { unhtml } from '../../lib/unhtml';
 
 export interface SuggestionEntry {
@@ -113,11 +114,15 @@ export const mapSuggestResponse = (suggestions: SuggestResponse): Suggestions =>
   for (const [i, hit] of documents.entries()) {
     if (!isContentHit(hit)) continue;
     const { name, url } = hit.highlighted._content_i18n;
-    if (!url) continue;
-    entries.push({ id: `page_suggestion_${i}`, type: 'page', title: unhtml(name), link: { type: 'url', href: url } });
+    const href = linkTargetOf(url);
+    if (!href) continue;
+    entries.push({ id: `page_suggestion_${i}`, type: 'page', title: unhtml(name), link: { type: 'url', href } });
   }
 
   for (const [i, hit] of (findKind(suggestions, 'promotions')?.hits ?? []).entries()) {
+    const href = linkTargetOf(hit.url);
+    // A promotion is a link and nothing else, so one without a usable target is left out.
+    if (!href) continue;
     const alt = hit.image?.alt ?? hit.name;
     const sources = [
       ...(hit.image?.desktop ? [{ provider: 'raw', src: hit.image.desktop, responsive: 'desktop' as const }] : []),
@@ -127,7 +132,7 @@ export const mapSuggestResponse = (suggestions: SuggestResponse): Suggestions =>
       id: `promotion_suggestion_${i}`,
       type: 'promotion',
       title: hit.name,
-      link: { type: 'url', href: hit.url },
+      link: { type: 'url', href },
       ...(sources.length > 0 ? { cover: { type: 'image', alt, sources } } : {}),
     });
   }

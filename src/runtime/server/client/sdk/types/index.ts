@@ -1,5 +1,6 @@
 import type { Facet } from '../../types/facets';
 import type { Hit } from '../../types/hit';
+import type { Product } from '../../types/product';
 
 export type SearchParams = Record<string, string | number | null | undefined | string[]>;
 
@@ -118,7 +119,7 @@ export type SuggestItem =
 export type SuggestResponse = Array<SuggestItem>;
 
 export type RecommendationsResponse = Array<{
-  document: { id: string };
+  document: Pick<Product, 'id' | '_product'>;
   type: 'also' | 'together' | 'related';
 }>;
 

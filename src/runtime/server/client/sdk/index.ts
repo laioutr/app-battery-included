@@ -7,6 +7,7 @@ import type {
   SuggestResponse,
   WithDefaultParams,
 } from './types';
+import { productIdOf } from '../../lib/productId';
 
 /** How much of an error body is kept on the thrown error. */
 const ERROR_BODY_LIMIT = 500;
@@ -112,6 +113,17 @@ class BatteryIncludedSDK {
     return this.get<SuggestResponse>(`/documents/suggest`, { q: query });
   }
 
+  /**
+   * BI's own id of each product, keyed by the commerce app's product id. One browse for all of them;
+   * a product BI does not index is absent.
+   */
+  async documentIdsOf(productIds: string[]): Promise<Map<string, string>> {
+    if (productIds.length === 0) return new Map();
+    const response = await this.browse({ page: 1, per_page: productIds.length, filters: { 'f[_product.id][]': productIds } });
+    return new Map(response.hits.map((hit) => [productIdOf(hit.document), hit.document.id]));
+  }
+
+  /** Recommendations for one product, by BI's own id (see `documentIdsOf`). */
   async recommend({ id }: { id: string }) {
     return this.get<RecommendationsResponse>('/documents/recommendations', { id });
   }

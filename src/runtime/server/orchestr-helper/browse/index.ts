@@ -1,6 +1,7 @@
 import type { QueryHandlerResponseMulti, QueryWireRequestFilter } from '#orchestr/types';
 import type BatteryIncludedSDK from '../../client/sdk';
 import type { BrowseResponse, SearchParams } from '../../client/sdk/types';
+import { productIdOf } from '../../lib/productId';
 import {
   type FacetMappingOptions,
   mapBatteryIncludedFacetsToAvailableFilters,
@@ -50,7 +51,7 @@ export const browseProducts = async ({
   return {
     response,
     result: {
-      ids: response.hits.map((hit) => hit.document.id),
+      ids: response.hits.map((hit) => productIdOf(hit.document)),
       total: response.found,
       availableFilters: mapBatteryIncludedFacetsToAvailableFilters(response.facet_counts, facetOptions),
       availableSortings: toAvailableSortings(sortings),

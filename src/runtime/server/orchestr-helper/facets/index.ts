@@ -75,7 +75,8 @@ export const mapBatteryIncludedFacetsToAvailableFilters = (
 
 /**
  * Returns the search params for BI's browse API: lists as `f[<field>][]` (one entry per value), ranges
- * as `f[<field>][from]` / `f[<field>][till]` with an open end left out, booleans as a one-value list.
+ * as `f[<field>][from]` / `f[<field>][till]`, booleans as a one-value list. BI applies a range only
+ * when both ends are sent, so an open end is sent as the widest safe integer.
  */
 export const mapSelectedFiltersToBatteryIncludedFilters = (filters: QueryWireRequestFilter): SearchParams => {
   const batteryIncludedFilters: SearchParams = {};
@@ -86,8 +87,9 @@ export const mapSelectedFiltersToBatteryIncludedFilters = (filters: QueryWireReq
     } else if (typeof value === 'boolean') {
       batteryIncludedFilters[`f[${field}][]`] = [String(value)];
     } else {
-      if (value.min !== undefined) batteryIncludedFilters[`f[${field}][from]`] = value.min;
-      if (value.max !== undefined) batteryIncludedFilters[`f[${field}][till]`] = value.max;
+      if (value.min === undefined && value.max === undefined) continue;
+      batteryIncludedFilters[`f[${field}][from]`] = value.min ?? Number.MIN_SAFE_INTEGER;
+      batteryIncludedFilters[`f[${field}][till]`] = value.max ?? Number.MAX_SAFE_INTEGER;
     }
   }
 
