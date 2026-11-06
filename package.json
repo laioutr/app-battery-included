@@ -36,7 +36,8 @@
     "prepack": "nuxt-module-build build",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "pnpm run prepack && changeset publish"
+    "release": "pnpm run prepack && changeset publish",
+    "release:cockpit": "LAIOUTR_API_KEY=\"$LAIOUTR_APP_PUBLISH_KEY\" laioutr app release"
   },
   "dependencies": {
     "@laioutr-app/shopify": "^0.52.1",
@@ -51,6 +52,7 @@
     "@changesets/cli": "^2.31.1",
     "@laioutr-core/devtools": "^0.80.0",
     "@laioutr-core/orchestr": "^0.80.0",
+    "@laioutr/cli": "^0.6.1",
     "@laioutr/eslint-config": "^1.9.5",
     "@nuxt/devtools-ui-kit": "2.5.0",
     "@nuxt/module-builder": "^1.0.1",
