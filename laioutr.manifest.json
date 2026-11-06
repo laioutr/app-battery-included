@@ -18,6 +18,12 @@
             "required": true
           },
           {
+            "name": "locale",
+            "type": "text",
+            "label": "Locale",
+            "description": "The language and region Battery Included indexed this collection under, e.g. de-DE. Leave it empty to use the storefront language with the market's country (de in a market for Germany becomes de-DE)."
+          },
+          {
             "name": "apiKey",
             "type": "secret",
             "label": "API key",
@@ -25,7 +31,9 @@
           }
         ],
         "test": {
-          "hosts": ["api.batteryincluded.io"],
+          "hosts": [
+            "api.batteryincluded.io"
+          ],
           "method": "GET",
           "url": "https://api.batteryincluded.io/api/v1/collections/{{collection}}/documents/browse?per_page=1",
           "headers": {

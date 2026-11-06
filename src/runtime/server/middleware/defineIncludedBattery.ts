@@ -1,6 +1,7 @@
 import { defineOrchestr, useRuntimeConfig } from '#imports';
 import { name } from '../../../../package.json';
 import batteryIncludedClientFactory from '../client';
+import { biLocaleOf } from '../lib/locale';
 import { DEFAULT_SORTINGS } from '../orchestr-helper/sorting';
 
 export const defineBatteryIncluded = defineOrchestr
@@ -16,8 +17,7 @@ export const defineBatteryIncluded = defineOrchestr
       streamId: config.fields?.streamId ?? '_product.streamIds',
     };
 
-    // BI matches documents by the full tag the shop exported ("de-DE"); "de" alone finds nothing.
-    const batteryIncludedClient = batteryIncludedClientFactory({ locale: clientEnv.language.code });
+    const batteryIncludedClient = batteryIncludedClientFactory({ locale: biLocaleOf(config.locale, clientEnv.language, clientEnv.market) });
 
     return { context: { sortings, facetOptions, fields, batteryIncludedClient } };
   });
