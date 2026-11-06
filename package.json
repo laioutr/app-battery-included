@@ -1,6 +1,6 @@
 {
   "name": "@laioutr/app-battery-included",
-  "version": "1.0.125",
+  "version": "1.1.0",
   "description": "BatteryIncluded search and recommendations for Laioutr",
   "repository": "laioutr/app-battery-included",
   "license": "MIT",
@@ -36,7 +36,8 @@
     "prepack": "nuxt-module-build build",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "pnpm run prepack && changeset publish"
+    "release": "pnpm run prepack && changeset publish",
+    "release:cockpit": "LAIOUTR_API_KEY=\"$LAIOUTR_APP_PUBLISH_KEY\" laioutr app release"
   },
   "dependencies": {
     "@nuxt/kit": "3.16.2",
@@ -58,6 +59,7 @@
     "@laioutr-core/frontend-core": "^0.80.0",
     "@laioutr-core/kit": "^0.80.0",
     "@laioutr-core/orchestr": "^0.80.0",
+    "@laioutr/cli": "^0.6.1",
     "@laioutr/eslint-config": "^1.9.5",
     "@nuxt/devtools-ui-kit": "2.5.0",
     "@nuxt/module-builder": "^1.0.1",
