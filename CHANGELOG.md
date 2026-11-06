@@ -1,4 +1,71 @@
-# @laioutr-app/battery-included
+# @laioutr/app-battery-included
+
+## 1.2.0
+
+### Minor Changes
+
+- 21028be: BI's merchandising extensions are exposed through two new query tokens, since canonical product queries have no slot for them:
+
+  - `battery-included/listing/teasers` (`BatteryIncludedListingTeasersQuery`, input `{ categoryId?, streamId?, query? }`) answers `BatteryIncludedTeaser` entities with `position` (1-based index on the current page), `format` and its `rows`/`columns`, `link`, a desktop/mobile `image`, `code` and `itemType`.
+  - `battery-included/search/redirect` (`BatteryIncludedSearchRedirectQuery`, input `{ query }`) answers the `url` BI sends a search term to, or "not found".
+
+  The product queries also put BI's raw `extensions` into the `browseExtensionsToken` passthrough for project handlers.
+
+- d9b74f9: Filters are sent the way BI reads them: a multi-select as `f[<field>][]` (one entry per value) instead of repeated `f[<field>]`.
+
+  Facets map more of what BI returns: price, manufacturer and category fields get Orchestr's well-known names (`price`, `brand`, `category`); category-tree values are labelled by the name BI attaches; a facet is presented as swatches when its field is listed in the new `swatchFacets` module option or BI attaches a colour or image to its values. Orchestr filters have no tree, so a category hierarchy is flattened in BI's order.
+
+- 47ef678: Category listings from BI: `ProductsByCategoryIdQuery` filters `_product_i18n.categoryTree.id` by the Shopware category id, and the app's own `battery-included/product/by-stream-id` query (`BatteryIncludedProductsByStreamIdQuery`) filters `_product.streamIds` by a product-stream id. Both answer with BI's facets, sortings and pagination like search, and are cached for 5 minutes. The fields are configurable with the `fields` module option.
+
+  `ProductsByCategoryIdQuery` and `ProductSearchQuery` have `order: 2`, so with `@laioutr/app-shopware` installed (which implements both without an order) BI serves them regardless of install order. The README explains how a listing page binds a category id when its route carries a slug.
+
+- 588b5a2: Listings offer the sortings relevance (`relevance`), price ascending and descending (`price-asc`, `price-desc`), top sellers (`topseller`, `_history.salesCount` descending) and newest (`newest`, `_common.releaseDate` descending). The keys are translated to BI's `<field>:<asc|desc>` sort; before, the key was sent to BI as is. Configure your own list with the `sortings` module option. The earlier keys `price:asc` and `price:desc` still work, a raw BI expression such as `_product.stock:desc` is passed through, and an unknown key falls back to BI's relevance order.
+- c735fbb: The Laioutr core packages are peer dependencies now (`>=` the versions this release builds against), so a project resolves one copy of them. `@laioutr-app/shopify` is no longer a dependency: it is only used by the playground, and the module no longer installs it during `nuxt prepare`.
+
+  **Breaking:** install `@laioutr-core/canonical-types`, `core-types`, `frontend-core`, `kit` and `orchestr` in your project if it does not have them yet. A Laioutr storefront already has them.
+
+- 74d2d08: Requests to Battery Included are more robust:
+
+  - A non-2xx answer throws `BatteryIncludedApiError` (with `status`, `endpoint` and a short `body`) instead of being parsed as data. `isBatteryIncludedApiError` is exported from `@laioutr/app-battery-included/runtime`.
+  - Product search and suggest are cached for 5 minutes (Orchestr defaults: first page, unfiltered requests). Identical BI requests in flight at the same time share one call.
+  - The BI locale is read from `clientEnv.language.code` instead of the deprecated `clientEnv.locale`.
+  - Recommendations are cached per product for 5 minutes and answer their relation inline. A product whose BI call fails gets no recommendations instead of failing the others, and that fallback is not cached. The recommendation resolver no longer throws when the passthrough is empty.
+
+- aa1f268: The app's settings can be set per environment in the Cockpit, under Configuration → Battery Included: the collection and its API key, with a Test button that checks both against Battery Included, the listing sortings, swatch filters and filter fields, and the API address. Values set in the Cockpit reach the module as its options, so nothing changes for a project that sets them in `nuxt.config.ts`.
+- 22be59b: Suggest maps the kinds BI returns today:
+
+  - Category suggestions from `facet._product_i18n.categoryTree.name` link to the `Category` by the id BI attaches; `facet._product_i18n.categories` (and the older `facet._product.categories`) link to the search page. Before, only `facet._product.categories` was read, so category suggestions were empty on current indexes.
+  - Product suggestions link to the `Product` instead of searching for its name, with a cover where the index has an image. The new `SuggestedSearchProductsLink` returns the suggested products as `Product` ids, so the commerce app resolves price and image.
+  - Content pages (`_content_i18n`) become `page` entries and BI promotions `promotion` entries, both linking to their URL.
+  - Highlights link to the search page with their term (before, with an empty term).
+
+### Patch Changes
+
+- 0f42d75: Search, listings and recommendations work against a live BI collection.
+
+  - **Results:** BI is asked with the full language tag (`de-DE`); the bare language (`de`) matched no documents.
+  - **Products:** hits and recommendations are handed to the commerce app by its own product id (`_product.id`), not BI's product number, so the products resolve.
+  - **Recommendations:** a product's BI id is looked up first, in one request for all products on the page.
+  - **Price ranges:** a range with one open end filters again; BI applies a range only when both ends are sent.
+  - **Links:** teaser, promotion, content-page and redirect URLs from BI are kept only when they are a path on the storefront or an http(s) URL. An extension without data is skipped instead of failing the answer.
+
+## 1.1.0
+
+### Minor Changes
+
+- d400829: The app is open source and published to npmjs.org as `@laioutr/app-battery-included`, under the MIT licence.
+
+  **Breaking:** the package and its configuration key are renamed. Install the new package and move its options:
+
+  ```ts
+  // before
+  modules: ['@laioutr-app/battery-included'],
+  '@laioutr-app/battery-included': { collection, apiKey },
+
+  // after
+  modules: ['@laioutr/app-battery-included'],
+  '@laioutr/app-battery-included': { collection, apiKey },
+  ```
 
 ## 1.0.125
 
