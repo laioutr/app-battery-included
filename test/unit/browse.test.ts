@@ -41,6 +41,7 @@ describe('browseProducts', () => {
 
     expect(browse).toHaveBeenCalledWith({
       query: undefined,
+      preset: undefined,
       page: 2,
       per_page: 20,
       filters: { 'f[brand][]': ['A'], 'f[_product_i18n.categoryTree.id][]': ['cat-1'] },
@@ -56,5 +57,21 @@ describe('browseProducts', () => {
     await browseProducts({ context, query: 'sofa', pagination: { page: 1, limit: 48 } });
 
     expect(browse).toHaveBeenCalledWith(expect.objectContaining({ query: 'sofa', filters: {}, sort: undefined }));
+  });
+
+  it('passes a preset id, leaving the order to BI without a sorting', async () => {
+    const { browse, context } = setup();
+
+    const { result } = await browseProducts({ context, preset: 'new-arrivals', pagination: { page: 1, limit: 20 }, filter: { brand: ['A'] } });
+
+    expect(browse).toHaveBeenCalledWith({
+      query: undefined,
+      preset: 'new-arrivals',
+      page: 1,
+      per_page: 20,
+      filters: { 'f[brand][]': ['A'] },
+      sort: undefined,
+    });
+    expect(result).toMatchObject({ ids: ['p1', 'p2'], total: 2 });
   });
 });

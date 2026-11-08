@@ -65,6 +65,18 @@ describe('BatteryIncludedSDK', () => {
     expect([...ids]).toEqual([['sw-1', '31196400']]);
   });
 
+  it('sends a preset id with a browse', async () => {
+    const fetchMock = vi.fn(async (_url: string) => Response.json({ hits: [], found: 0, facet_counts: [], out_of: 0, page: 1 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await sdk().browse({ preset: 'cart-campaign', page: 1, per_page: 20 });
+
+    const url = new URL(fetchMock.mock.calls[0]![0]);
+    expect(url.pathname).toBe('/api/v1/collections/shop/documents/browse');
+    expect(url.searchParams.get('preset')).toBe('cart-campaign');
+    expect(url.searchParams.has('q')).toBe(false);
+  });
+
   it('asks nothing for no products', async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
