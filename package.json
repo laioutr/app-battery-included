@@ -1,6 +1,6 @@
 {
   "name": "@laioutr/app-battery-included",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "BatteryIncluded search and recommendations for Laioutr",
   "repository": "laioutr/app-battery-included",
   "license": "MIT",
