@@ -6,6 +6,7 @@ import { BatteryIncludedApiError } from '../../src/runtime/server/client/sdk/err
 import {
   categoriesOfFacets,
   categoryTemplatesOf,
+  presetTemplatesOf,
   provideCategoryTemplates,
   searchTemplatesOf,
 } from '../../src/runtime/server/orchestr-helper/templates';
@@ -126,5 +127,16 @@ describe('searchTemplatesOf', () => {
   it('offers nothing without a term', () => {
     expect(searchTemplatesOf(undefined)).toEqual([]);
     expect(searchTemplatesOf('   ')).toEqual([]);
+  });
+});
+
+describe('presetTemplatesOf', () => {
+  it('offers the trimmed term as a preset id', () => {
+    expect(presetTemplatesOf(' cart-campaign ')).toEqual([{ input: { presetId: 'cart-campaign' }, label: 'Preset: cart-campaign' }]);
+  });
+
+  it('offers nothing without a term', () => {
+    expect(presetTemplatesOf(undefined)).toEqual([]);
+    expect(presetTemplatesOf('  ')).toEqual([]);
   });
 });

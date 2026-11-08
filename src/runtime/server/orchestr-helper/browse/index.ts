@@ -13,6 +13,8 @@ export interface BrowseProductsArgs {
   context: { batteryIncludedClient: BatteryIncludedSDK; sortings: BatteryIncludedSorting[]; facetOptions: FacetMappingOptions };
   /** The search term. Left out for a listing, which BI then answers in its listing order. */
   query?: string;
+  /** A BI preset id: the listing is the product selection set up under it in BI. */
+  preset?: string;
   /**
    * Filters the listing is scoped to, as BI search params (e.g. the category). They win over a
    * filter the visitor applied to the same field.
@@ -31,6 +33,7 @@ export interface BrowseProductsArgs {
 export const browseProducts = async ({
   context,
   query,
+  preset,
   scope = {},
   pagination,
   filter,
@@ -42,6 +45,7 @@ export const browseProducts = async ({
 
   const response = await batteryIncludedClient.browse({
     query,
+    preset,
     page: pagination.page,
     per_page: pagination.limit,
     filters: { ...(filter ? mapSelectedFiltersToBatteryIncludedFilters(filter) : {}), ...scope },

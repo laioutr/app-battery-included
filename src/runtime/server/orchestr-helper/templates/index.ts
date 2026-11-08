@@ -92,3 +92,12 @@ export const searchTemplatesOf = (term: string | undefined): RemoteQueryTemplate
   const query = term?.trim();
   return query ? [{ input: { query }, label: `Search: ${query}` }] : [];
 };
+
+/**
+ * One preset for the BI preset query: the typed term as the preset id. BI's API has no endpoint that lists
+ * presets, so there are no names to search; the editor copies the id from BI. No term, no preset.
+ */
+export const presetTemplatesOf = (term: string | undefined): RemoteQueryTemplateWithInput[] => {
+  const presetId = term?.trim();
+  return presetId ? [{ input: { presetId }, label: `Preset: ${presetId}` }] : [];
+};
