@@ -7,6 +7,8 @@ import { DEFAULT_SORTINGS } from '../orchestr-helper/sorting';
 export const defineBatteryIncluded = defineOrchestr
   .meta({
     app: name,
+    label: 'Battery Included',
+    logoUrl: '/app-battery-included/battery-included-logo.png',
   })
   .extendRequest(({ clientEnv }) => {
     const config = useRuntimeConfig()['@laioutr/app-battery-included'];
@@ -26,3 +28,4 @@ export const defineBatteryIncludedAction = defineBatteryIncluded.actionHandler;
 export const defineBatteryIncludedQuery = defineBatteryIncluded.queryHandler;
 export const defineBatteryIncludedLink = defineBatteryIncluded.linkHandler;
 export const defineBatteryIncludedComponentResolver = defineBatteryIncluded.componentResolver;
+export const defineBatteryIncludedQueryTemplateProvider = defineBatteryIncluded.queryTemplateProvider;

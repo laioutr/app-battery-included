@@ -53,6 +53,17 @@ BI filters by category **id**; it does not know category slugs. How a page gets 
 - **A page or section for one category** (e.g. a landing page with a product grid): add a `ProductsByCategoryIdQuery` (or the stream query) in Studio and set `categoryId` to the Shopware category id. This fits setups where the section picks the category or stream.
 - **The dynamic product listing page** (`ProductListingPage`, route `/categories/:slug+`): its products query is `ProductsByCategorySlugQuery` with the slug from the route. Studio input rules are evaluated against `route` and `clientEnv` only, so they cannot pass the id that the page's `CategoryBySlugQuery` resolves on to `ProductsByCategoryIdQuery`. Either carry the id in the URL (a page path with an id param, bound as `categoryId: { var: 'route.params.id' }`; not tried with `ProductListingPage`'s own path constraints), or keep `ProductsByCategorySlugQuery` and register a project handler for it with an `order` above 2 that resolves the slug to the id (e.g. through the commerce app's category lookup) and runs the same BI browse. This app does not implement `ProductsByCategorySlugQuery`.
 
+## Studio presets
+
+When an editor configures a query in Studio, the picker offers presets from the app that serves the token. With this app serving search and category listings (`order: 2`), they come from Battery Included, shown with its name and logo:
+
+| Token                       | Presets for the typed term                                                                                                                                                                                                                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ProductsByCategoryIdQuery` | The categories of BI's category-tree facet (the `fields.categoryId` facet, else another `_product_i18n.categoryTree.*` facet whose values carry an id) whose name contains the term in any case, or whose id is the term; at most 50, labelled by name, with the id added when two categories share a name. |
+| `ProductSearchQuery`        | One preset searching for the term. None while the field is empty.                                                                                                                                                                                                                                           |
+
+The categories come from one browse of the collection, so a category appears only when BI returns it in that facet: the collection's facet config must include the category tree, and a category without products is not listed. When BI fails or has no such facet, the picker shows no presets and the server logs a warning naming the token; the query itself is unaffected. The stream query has no presets, because BI's index carries stream ids without names.
+
 ## Sorting
 
 | Key          | BI `sort`                  |

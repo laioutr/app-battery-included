@@ -65,6 +65,10 @@ const module: NuxtModule<ModuleOptions> = defineNuxtModule<ModuleOptions>({
     // Runtime configuration for this module
     nuxt.options.runtimeConfig[name] = defu(nuxt.options.runtimeConfig[name] as Partial<ModuleOptions> | undefined, options);
 
+    // The files sit in an app-battery-included/ folder, so their URLs cannot collide with project pages.
+    nuxt.options.nitro.publicAssets ??= [];
+    nuxt.options.nitro.publicAssets.push({ dir: resolveRuntimeModule('./app/public'), maxAge: 60 * 60 * 24 * 7 });
+
     await registerLaioutrApp({
       name,
       version,
