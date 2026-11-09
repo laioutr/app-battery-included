@@ -39,13 +39,16 @@ defineNuxtConfig({
 | `ProductsByCategoryIdQuery` (canonical)                  | `{ categoryId }` | `browse?f[_product_i18n.categoryTree.id][]=<id>`  | 2       |
 | `battery-included/product/by-stream-id` (this app's own) | `{ streamId }`   | `browse?f[_product.streamIds][]=<id>`             | –       |
 | `battery-included/product/by-preset` (this app's own)    | `{ presetId }`   | `browse?preset=<id>`                              | –       |
+| `battery-included/product/by-ids` (this app's own)       | `{ ids }`        | `browse?f[_product.id][]=<id>`                    | –       |
 | `SuggestedSearchSearchQuery` (canonical)                 | `{ query? }`     | `suggest?q=<query>`, `highlights` without a query | 2       |
 
 All of them answer with BI's facets as filters and the configured sortings, and are cached for 5 minutes (first page, unfiltered). The preset query asks for 20 products by default, the others for 48.
 
 `app-shopware` implements `ProductSearchQuery` and `ProductsByCategoryIdQuery` too, without an `order`. Orchestr serves a token from the handler with the highest `order`, so with both apps installed, search and category listings come from BI regardless of the install order. A single query can still be pinned to another app in Studio (the query's provider override).
 
-The stream and preset tokens are exported as `BatteryIncludedProductsByStreamIdQuery` and `BatteryIncludedProductsByPresetQuery` from `@laioutr/app-battery-included/runtime`; canonical types have no stream or preset query.
+The stream, preset and id tokens are exported as `BatteryIncludedProductsByStreamIdQuery`, `BatteryIncludedProductsByPresetQuery` and `BatteryIncludedProductsByIdsQuery` from `@laioutr/app-battery-included/runtime`; canonical types have no stream or preset query.
+
+`by-ids` answers with the ids BI indexes products under, the variants its listings show, in the order asked for. A storefront whose product page holds the parent product passes the default variant's id here to reach BI's links for it, such as the recommended products: BI does not index parent ids.
 
 ### Presets
 
